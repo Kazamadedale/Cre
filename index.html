@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCL - Le Crédit Lyonnais</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            min-height: 700px;
+        }
+
+        /* LOGIN SCREEN */
+        .login-screen {
+            padding: 60px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            background: #003d7a;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 0 auto 40px;
+            width: 250px;
+        }
+
+        .logo-text {
+            font-size: 60px;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 10px;
+        }
+
+        .logo-subtext {
+            color: white;
+            font-size: 11px;
+            margin-top: 8px;
+            letter-spacing: 3px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #003d7a;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: #003d7a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .login-btn:hover {
+            background: #002a56;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* BANKING SCREEN */
+        .banking-screen {
+            display: none;
+            height: 100%;
+        }
+
+        .header {
+            background: #003d7a;
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .main-content {
+            padding: 25px;
+            background: #f5f5f5;
+            min-height: calc(100% - 60px);
+        }
+
+        .user-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .balance-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .balance-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #003d7a;
+            margin-bottom: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .balance-amount.updated {
+            animation: balanceUpdate 0.6s ease;
+        }
+
+        @keyframes balanceUpdate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); color: #d32f2f; }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* NOTIFICATION */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .notification.pending {
+            border-left: 4px solid #ff9800;
+        }
+
+        .notification-icon {
+            font-size: 24px;
+        }
+
+        .notification-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* TRANSFER SECTION */
+        .transfer-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .transfer-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .transfer-section input {
+            margin-bottom: 15px;
+        }
+
+        .transfer-btn {
+            width: 100%;
+            padding: 15px;
+            background: #003d7a;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .transfer-btn:hover {
+            background: #002a56;
+        }
+
+        .transfer-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            width: 100%;
+            padding: 15px;
+            background: #e0e0e0;
+            color: #666;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* HISTORY */
+        .history-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .history-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .transaction:hover {
+            background: #f9f9f9;
+        }
+
+        .transaction:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .transaction-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid #856404;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .transaction-iban {
+            color: #666;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .transaction-date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .transaction-detail {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
+        .transaction-amount.negative {
+            color: #d32f2f;
+        }
+
+        .transaction-amount.positive {
+            color: #4caf50;
+        }
+
+        .transaction-amount.pending {
+            color: #ff9800;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-size: 14px;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        /* SETTINGS */
+        .settings-toggle {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-toggle:hover {
+            background: #f9f9f9;
+        }
+
+        .settings-toggle h3 {
+            color: #333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-icon {
+            font-size: 20px;
+        }
+
+        .settings-arrow {
+            transition: transform 0.3s;
+        }
+
+        .settings-arrow.active {
+            transform: rotate(180deg);
+        }
+
+        .settings-content {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .settings-content.active {
+            max-height: 1000px;
+            padding: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 25px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section h3 {
+            color: #003d7a;
+            font-size: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .setting-value {
+            color: #003d7a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .phone-container {
+                border-radius: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- NOTIFICATION -->
+        <div class="notification" id="notification">
+            <span class="notification-icon" id="notificationIcon"></span>
+            <span class="notification-text" id="notificationText"></span>
+        </div>
+
+        <!-- LOGIN SCREEN -->
+        <div class="login-screen" id="loginScreen">
+            <div class="logo">
+                <div class="logo-text">LCL</div>
+                <div class="logo-subtext">LE CRÉDIT LYONNAIS</div>
+            </div>
+            <h2>Connexion</h2>
+            <div class="input-group">
+                <label>Identifiant</label>
+                <input type="text" id="username" placeholder="Votre identifiant">
+            </div>
+            <div class="input-group">
+                <label>Mot de passe</label>
+                <input type="password" id="password" placeholder="Votre mot de passe">
+            </div>
+            <button class="login-btn" onclick="login()">Se connecter</button>
+            <div class="error" id="errorMsg">Identifiant ou mot de passe incorrect</div>
+        </div>
+
+        <!-- BANKING SCREEN -->
+        <div class="banking-screen" id="bankingScreen">
+            <div class="header">
+                <div class="header-left">
+                    <h1>Mon Compte</h1>
+                </div>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+
+            <div class="main-content">
+                <div class="user-name">Bonjour, <span id="displayName"></span></div>
+
+                <div class="balance-card">
+                    <div class="balance-label">Solde disponible</div>
+                    <div class="balance-amount" id="balance">1 400 000,00 €</div>
+                    <div class="success-msg" id="successMsg">Virement effectué avec succès !</div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="showTransfer()">Faire un virement</button>
+                </div>
+
+                <div class="settings-toggle" onclick="toggleSettings()">
+                    <h3><span class="settings-icon">⚙️</span> Paramètres du compte</h3>
+                    <span class="settings-arrow" id="settingsArrow">▼</span>
+                </div>
+
+                <div class="settings-content" id="settingsContent">
+                    <div class="settings-section">
+                        <h3><span class="settings-icon">🔒</span> Sécurité</h3>
+                        <div class="setting-item">
+                            <span class="setting-label">Authentification 2 facteurs</span>
+                            <span class="setting-value">✓ Active</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Dernière connexion</span>
+                            <span class="setting-value" id="lastLogin">Aujourd'hui</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3><span class="settings-icon">🌍</span> Préférences</h3>
+                        <div class="setting-item">
+                            <span class="setting-label">Langue de l'application</span>
+                            <span class="setting-value">
+                                <select id="languageSelect" onchange="changeLanguage()" style="border: none; background: transparent; color: #003d7a; font-weight: 600; cursor: pointer; font-size: 14px;">
+                                    <option value="fr">🇫🇷 Français</option>
+                                    <option value="en">🇬🇧 English</option>
+                                </select>
+                            </span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Devise</span>
+                            <span class="setting-value">EUR (€)</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Format de date</span>
+                            <span class="setting-value">JJ/MM/AAAA</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Thème</span>
+                            <span class="setting-value">
+                                <select id="themeSelect" onchange="changeTheme()" style="border: none; background: transparent; color: #003d7a; font-weight: 600; cursor: pointer; font-size: 14px;">
+                                    <option value="light">☀️ Clair</option>
+                                    <option value="dark">🌙 Sombre</option>
+                                </select>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3><span class="settings-icon">👤</span> Type de compte</h3>
+                        <div class="setting-item">
+                            <span class="setting-label">Catégorie</span>
+                            <span class="setting-value">Compte Premium</span>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Conseiller dédié</span>
+                            <span class="setting-value">✓ Disponible</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transfer-section" id="transferSection">
+                    <h3>Nouveau virement</h3>
+                    
+                    <div class="input-group">
+                        <label>IBAN du bénéficiaire</label>
+                        <input type="text" id="recipientIban" placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Nom du bénéficiaire</label>
+                        <input type="text" id="recipientName" placeholder="Nom du bénéficiaire">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Montant (€)</label>
+                        <input type="number" id="amount" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    
+                    <button class="transfer-btn" id="transferBtn" onclick="makeTransfer()">Confirmer le virement</button>
+                    <button class="cancel-btn" onclick="hideTransfer()">Annuler</button>
+                </div>
+
+                <div class="history-section">
+                    <h3>Historique du compte</h3>
+                    <div id="historyList">
+                        <div class="empty-history">Aucune transaction</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentBalance = 1500000;
+        let userName = '';
+        let transactions = [];
+        const API_URL = 'api.php';
+
+        // Charger les données depuis l'API PHP
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_URL}?action=balance&username=${encodeURIComponent(userName)}`);
+                const data = await response.json();
+                
+                if (data.balance !== undefined) {
+                    currentBalance = data.balance;
+                    transactions = data.transactions || [];
+                    
+                    // Mettre à jour l'affichage
+                    document.getElementById('balance').textContent = formatMoney(currentBalance);
+                    updateHistory();
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+            }
+        }
+
+        // Fonction pour rafraîchir les données depuis le serveur
+        async function refreshData() {
+            await loadData();
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username) {
+                document.getElementById('errorMsg').textContent = 'Veuillez entrer un nom d\'utilisateur';
+                document.getElementById('errorMsg').style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}?action=login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userName = username;
+                    currentBalance = data.user.balance;
+                    transactions = data.user.transactions || [];
+                    
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('bankingScreen').style.display = 'block';
+                    document.getElementById('displayName').textContent = userName;
+                    document.getElementById('errorMsg').style.display = 'none';
+                    
+                    // Mettre à jour l'affichage
+                    document.getElementById('balance').textContent = formatMoney(currentBalance);
+                    updateHistory();
+                } else {
+                    document.getElementById('errorMsg').textContent = data.message || 'Mot de passe incorrect';
+                    document.getElementById('errorMsg').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('errorMsg').textContent = 'Erreur de connexion au serveur';
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('bankingScreen').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function showTransfer() {
+            document.getElementById('transferSection').style.display = 'block';
+        }
+
+        function hideTransfer() {
+            document.getElementById('transferSection').style.display = 'none';
+            document.getElementById('recipientIban').value = '';
+            document.getElementById('recipientName').value = '';
+            document.getElementById('amount').value = '';
+        }
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+
+            notification.className = 'notification ' + type;
+            
+            if (type === 'success') {
+                icon.textContent = '✓';
+            } else if (type === 'pending') {
+                icon.textContent = '⏳';
+            }
+            
+            text.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function makeTransfer() {
+            const iban = document.getElementById('recipientIban').value;
+            const name = document.getElementById('recipientName').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (!iban || !name || !amount || amount <= 0) {
+                alert('Veuillez remplir tous les champs correctement');
+                return;
+            }
+
+            if (amount > currentBalance) {
+                alert('Solde insuffisant');
+                return;
+            }
+
+            // Désactiver le bouton pendant le traitement
+            const transferBtn = document.getElementById('transferBtn');
+            transferBtn.disabled = true;
+            transferBtn.textContent = 'Traitement en cours...';
+
+            try {
+                // Faire la transaction via l'API
+                const response = await fetch(`${API_URL}?action=transaction`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: userName,
+                        recipient: name,
+                        amount: amount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Mettre à jour les données locales
+                    currentBalance = data.balance;
+                    transactions = data.transactions || [];
+
+                    // Mettre à jour l'affichage avec animation
+                    const balanceElement = document.getElementById('balance');
+                    balanceElement.classList.add('updated');
+                    balanceElement.textContent = formatMoney(currentBalance);
+                    
+                    setTimeout(() => {
+                        balanceElement.classList.remove('updated');
+                    }, 600);
+
+                    updateHistory();
+                    hideTransfer();
+
+                    // Notification de succès
+                    showNotification('Virement en cours de traitement...', 'pending');
+                } else {
+                    alert(data.message || 'Erreur lors de la transaction');
+                }
+            } catch (error) {
+                alert('Erreur lors de la communication avec le serveur');
+            }
+
+            // Réactiver le bouton
+            transferBtn.disabled = false;
+            transferBtn.textContent = 'Confirmer le virement';
+        }
+
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            if (transactions.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">Aucune transaction</div>';
+                return;
+            }
+
+            historyList.innerHTML = transactions.map(t => {
+                const statusBadge = t.status === 'pending' 
+                    ? '<span class="status-badge status-pending"><span class="spinner"></span> En attente</span>'
+                    : t.status === 'pending-static'
+                    ? '<span class="status-badge status-pending">⏳ En attente</span>'
+                    : '<span class="status-badge status-completed">✓ Validé</span>';
+                
+                const amountClass = (t.status === 'pending' || t.status === 'pending-static')
+                    ? 'pending' 
+                    : (t.amount < 0 ? 'negative' : 'positive');
+
+                // Calculer la date de retour de fonds (3 jours après)
+                const transactionDate = new Date(t.dateObj || Date.now());
+                const returnDate = new Date(transactionDate);
+                returnDate.setDate(returnDate.getDate() + 3);
+                const returnDateStr = returnDate.toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+
+                return `
+                    <div class="transaction">
+                        <div class="transaction-info">
+                            <div class="transaction-header">
+                                <div class="transaction-title">${t.type} - ${t.name}</div>
+                                ${statusBadge}
+                            </div>
+                            <div class="transaction-iban">IBAN: ${t.iban}</div>
+                            <div class="transaction-detail"><strong>Montant envoyé:</strong> ${formatMoney(Math.abs(t.amount))}</div>
+                            <div class="transaction-detail"><strong>DE:</strong> ${t.name}</div>
+                            <div class="transaction-detail"><strong>Jour de transaction:</strong> ${t.date}</div>
+                            <div class="transaction-detail"><strong>Retour de fonds:</strong> ${returnDateStr}</div>
+                        </div>
+                        <div class="transaction-amount ${amountClass}">
+                            ${t.amount < 0 ? '-' : '+'}${formatMoney(Math.abs(t.amount))}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleSettings() {
+            const settingsContent = document.getElementById('settingsContent');
+            const settingsArrow = document.getElementById('settingsArrow');
+            settingsContent.classList.toggle('active');
+            settingsArrow.classList.toggle('active');
+        }
+
+        function changeLanguage() {
+            const language = document.getElementById('languageSelect').value;
+            if (language === 'en') {
+                alert('English language support coming soon!\nSupport de la langue anglaise bientôt disponible!');
+            } else {
+                alert('Langue française sélectionnée ✓');
+            }
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            if (theme === 'dark') {
+                alert('Thème sombre à venir!\nDark theme coming soon!');
+            } else {
+                alert('Thème clair activé ✓');
+            }
+        }
+
+        // Update last login time
+        function updateLastLogin() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastLogin').textContent = `Aujourd'hui à ${timeString}`;
+        }
+
+        // Call on login
+        window.addEventListener('load', () => {
+            updateLastLogin();
+        });
+    </script>
+</body>
+</html>
